@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ujian Tryout PPPK TENDIK</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2a5ea8;
+      --secondary: #e74c3c;
+      --answered: #4CAF50;
+      --doubt: #FF9800;
+      --unanswered: #f44336;
+      --text: #333;
+      --text-light: #666;
+      --bg: #f5f7fa;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg);
+      margin: 0;
+      padding: 0;
+      position: relative;
+      min-height: 100vh;
+    }
+    
+    body::after {
+      content: "";
+      background-image: url('image/logo_pgri.png');
+      background-size: 300px;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0.08;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: -1;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .student-info {
+      font-weight: 600;
+      color: var(--primary);
+    }
+    
+    .timer {
+      font-weight: 600;
+      color: var(--text);
+      background-color: #f0f0f0;
+      padding: 5px 10px;
+      border-radius: 4px;
+    }
+    
+    .timer.warning {
+      color: var(--secondary);
+      animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+    
+    .main-container {
+      display: flex;
+      max-width: 1200px;
+      margin: 20px auto;
+      gap: 20px;
+      padding: 0 20px;
+    }
+    
+    .question-nav {
+      width: 250px;
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      height: fit-content;
+    }
+    
+    .question-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    
+    .question-number {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .question-number:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .unanswered {
+      background-color: var(--unanswered);
+      color: white;
+    }
+    
+    .answered {
+      background-color: var(--answered);
+      color: white;
+    }
+    
+    .doubt {
+      background-color: var(--doubt);
+      color: white;
+    }
+    
+    .current {
+      border: 2px solid var(--primary);
+      box-shadow: 0 0 0 2px rgba(42, 94, 168, 0.3);
+    }
+    
+    .question-area {
+      flex: 1;
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .question-category {
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    .question-text {
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .option {
+      display: flex;
+      align-items: center;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .option:hover {
+      background-color: #f9f9f9;
+    }
+    
+    .option input {
+      margin-right: 10px;
+    }
+    
+    .navigation {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+    }
+    
+    .btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-doubt {
+      background-color: var(--doubt);
+      color: white;
+    }
+    
+    .btn-next {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .btn:hover:not(:disabled) {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    
+    .score-container {
+      display: none;
+      max-width: 500px;
+      margin: 50px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    
+    .score-title {
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+    
+    .score-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+      }
+      
+      .question-nav {
+        width: 100%;
+      }
+      
+      .question-grid {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Form Login (Awal) -->
+  <div id="login-form" style="max-width:400px; margin:50px auto; padding:20px; background:white; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1); text-align:center;">
+    <h2 style="color:var(--primary);">Masuk Ujian</h2>
+    <input type="text" id="input-nomor" placeholder="Nama Peserta" 
+           style="width:100%; padding:10px; margin:10px 0; border:1px solid #ddd; border-radius:4px;">
+    <button onclick="mulaiUjian()" 
+            style="padding:10px 20px; background:var(--primary); color:white; border:none; border-radius:4px; cursor:pointer;">
+      Mulai Ujian
+    </button>
+  </div>
+
+  <!-- Area Ujian (Awalnya Disembunyikan) -->
+  <div id="exam-container" style="display:none;">
+    <div class="header">
+      <div class="student-info" id="student-info">PPPK KECAMATAN SUKOMORO</div>
+      <div class="timer" id="timer">Waktu: 120:00</div>
+    </div>
+    
+    <div class="main-container">
+      <div class="question-nav">
+        <h3>Navigasi Soal</h3>
+        <div class="question-grid" id="daftar-soal"></div>
+      </div>
+      
+      <div class="question-area">
+        <div id="soal-area">
+          <p>Pilih nomor soal untuk memulai ujian</p>
+        </div>
+        
+        <div class="navigation">
+          <button class="btn btn-doubt" id="btn-doubt">Ragu-Ragu</button>
+          <div>
+            <button class="btn" id="btn-back">Sebelumnya</button>
+            <button class="btn btn-next" id="btn-next">Berikutnya</button>
+            <button class="btn btn-next" id="btn-finish" style="display:none;">Selesai</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="score-container" id="skor-container">
+      <h2 class="score-title">Hasil Ujian</h2>
+      <div class="score-item">
+        <span>Teknis:</span>
+        <span id="skor-teknis">0</span>
+      </div>
+      <div class="score-item">
+        <span>Sosiokultural:</span>
+        <span id="skor-sosial">0</span>
+      </div>
+      <div class="score-item">
+        <span>Manajerial:</span>
+        <span id="skor-manajerial">0</span>
+      </div>
+      <div class="score-item">
+        <span>Wawancara:</span>
+        <span id="skor-wawancara">0</span>
+      </div>
+      <p id="reset-notice" style="font-style:italic; color:#666; margin-top:20px;"></p>
+    </div>
+  </div>
+
+  <script src="soal.js"></script>
+  <script>
+    // ================== KONSTANTA ==================
+    const DURASI_UJIAN = 120 * 60; // 120 menit dalam detik
+    const DELAY_RESET = 10000; // 10 detik setelah skor tampil
+
+    // ================== VARIABEL ==================
+    let jawabanUser = {};
+    let waktu = DURASI_UJIAN;
+    let timerInterval;
+    let indexAktif = 0;
+    let statusSoal = [];
+    let soalAcak = [];
+    let nomorPeserta = '';
+    let resetTimeout;
+
+    // ================== FUNGSI PENGACAKAN ==================
+    function acakSoal() {
+      // 1. Acak soal dengan Fisher-Yates
+      const soalAcak = [...soal];
+      for (let i = soalAcak.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [soalAcak[i], soalAcak[j]] = [soalAcak[j], soalAcak[i]];
+      }
+      
+      // 2. Update nomor urut
+      soalAcak.forEach((soal, idx) => soal.no = idx + 1);
+      return soalAcak;
+    }
+
+    function resetSoal() {
+      // 1. Acak ulang soal
+      soalAcak = acakSoal();
+      
+      // 2. Reset semua jawaban
+      jawabanUser = {};
+      statusSoal = Array(soalAcak.length).fill('unanswered');
+      
+      // 3. Update tampilan
+      tampilkanDaftarSoal();
+      tampilkanSoal(0);
+      
+      // 4. Notifikasi
+      document.getElementById('reset-notice').textContent = 
+        'Soal telah diacak ulang! Silakan refresh halaman untuk memulai ujian baru.';
+    }
+
+    // ================== FUNGSI UJIAN ==================
+    function mulaiUjian() {
+      // 1. Dapatkan nomor peserta
+      nomorPeserta = document.getElementById('input-nomor').value || 'PESERTA_' + Date.now();
+      
+      // 2. Sembunyikan form login, tampilkan ujian
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('exam-container').style.display = 'block';
+      document.getElementById('student-info').textContent = `SELAMAT MENGERJAKAN - ${nomorPeserta}`;
+      
+      // 3. Acak soal pertama kali
+      soalAcak = acakSoal();
+      
+      // 4. Mulai ujian
+      waktu = DURASI_UJIAN;
+      statusSoal = Array(soalAcak.length).fill('unanswered');
+      tampilkanDaftarSoal();
+      tampilkanSoal(0);
+      mulaiTimer();
+    }
+
+    function mulaiTimer() {
+      clearInterval(timerInterval);
+      
+      timerInterval = setInterval(() => {
+        waktu--;
+        const menit = String(Math.floor(waktu / 60)).padStart(2, '0');
+        const detik = String(waktu % 60).padStart(2, '0');
+        document.getElementById('timer').textContent = `Waktu: ${menit}:${detik}`;
+        
+        if (waktu <= 300) { // 5 menit terakhir
+          document.getElementById('timer').classList.add('warning');
+        }
+        
+        if (waktu <= 0) {
+          clearInterval(timerInterval);
+          tampilkanSkor();
+        }
+      }, 1000);
+    }
+
+    function tampilkanDaftarSoal() {
+      const daftar = document.getElementById('daftar-soal');
+      daftar.innerHTML = '';
+      
+      soalAcak.forEach((_, i) => {
+        const btn = document.createElement('div');
+        btn.textContent = i + 1;
+        btn.className = `question-number ${statusSoal[i]}`;
+        btn.dataset.index = i;
+        btn.onclick = () => tampilkanSoal(i);
+        daftar.appendChild(btn);
+      });
+    }
+
+    function tampilkanSoal(index) {
+      indexAktif = index;
+      const s = soalAcak[index];
+      
+      // Update status navigasi
+      document.querySelectorAll('.question-number').forEach(el => {
+        el.classList.remove('current');
+      });
+      document.querySelector(`.question-number[data-index="${index}"]`).classList.add('current');
+      
+      // Tampilkan soal
+      const opsi = Object.entries(s.opsi).map(([key, val]) => {
+        const checked = jawabanUser[index] === key ? 'checked' : '';
+        return `
+          <div class="option">
+            <input type="radio" name="opsi" id="opsi-${key}" value="${key}" ${checked}>
+            <label for="opsi-${key}">${key}. ${val}</label>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('soal-area').innerHTML = `
+        <div class="question-category">Soal No ${s.no} - ${s.kategori}</div>
+        <div class="question-text">${s.soal}</div>
+        <div class="options">${opsi}</div>
+      `;
+
+      // Update tombol navigasi
+      document.getElementById('btn-back').disabled = index === 0;
+      document.getElementById('btn-next').disabled = index === soalAcak.length - 1;
+      document.getElementById('btn-finish').style.display = 
+        (index === soalAcak.length - 1) ? 'inline-block' : 'none';
+    }
+
+    function tampilkanSkor() {
+      clearInterval(timerInterval);
+      
+      // Hitung skor
+      let skorTeknis = 0, skorSosial = 0, skorManajerial = 0, skorWawancara = 0;
+      
+      soalAcak.forEach((s, i) => {
+        const jwb = jawabanUser[i];
+        if (!jwb) return;
+
+        const kategori = s.kategori.toLowerCase();
+        const nilai = (typeof s.skor === 'object') ? (s.skor[jwb] || 0) :
+                      (s.answer === jwb ? s.score : 0);
+
+        if (kategori.includes('teknis')) skorTeknis += nilai;
+        else if (kategori.includes('sosio')) skorSosial += nilai;
+        else if (kategori.includes('manajerial')) skorManajerial += nilai;
+        else if (kategori.includes('wawancara')) skorWawancara += nilai;
+      });
+
+      // Tampilkan skor
+      document.querySelector('.main-container').style.display = 'none';
+      document.getElementById('skor-container').style.display = 'block';
+      document.getElementById('skor-teknis').textContent = skorTeknis;
+      document.getElementById('skor-sosial').textContent = skorSosial;
+      document.getElementById('skor-manajerial').textContent = skorManajerial;
+      document.getElementById('skor-wawancara').textContent = skorWawancara;
+      document.getElementById('reset-notice').textContent = 
+        'Soal akan diacak ulang dalam 10 detik...';
+      
+      // Reset soal setelah 10 detik
+      resetTimeout = setTimeout(resetSoal, DELAY_RESET);
+    }
+
+    // ================== EVENT LISTENER ==================
+    document.addEventListener('DOMContentLoaded', () => {
+      // Event listener untuk jawaban
+      document.addEventListener('change', (e) => {
+        if (e.target.name === 'opsi') {
+          jawabanUser[indexAktif] = e.target.value;
+          statusSoal[indexAktif] = 'answered';
+          tampilkanDaftarSoal();
+        }
+      });
+      
+      // Tombol navigasi
+      document.getElementById('btn-back').addEventListener('click', () => {
+        if (indexAktif > 0) tampilkanSoal(indexAktif - 1);
+      });
+      
+      document.getElementById('btn-next').addEventListener('click', () => {
+        if (indexAktif < soalAcak.length - 1) tampilkanSoal(indexAktif + 1);
+      });
+      
+      document.getElementById('btn-finish').addEventListener('click', () => {
+        if (confirm('Apakah Anda yakin ingin menyelesaikan ujian?')) {
+          tampilkanSkor();
+        }
+      });
+      
+      // Tombol ragu-ragu
+      document.getElementById('btn-doubt').addEventListener('click', () => {
+        statusSoal[indexAktif] = 'doubt';
+        tampilkanDaftarSoal();
+      });
+    });
+  </script>
+</body>
+</html>
